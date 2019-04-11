@@ -1,9 +1,8 @@
 import React, { Component } from 'react';
-import { Form, Container, Button, Message, Icon, Grid } from 'semantic-ui-react'
+import { Select, Input, Container, Button, Message, Icon, Grid } from 'semantic-ui-react'
 import { API_ENDPOINT_OANDA, API_KEY_OANDA, SELECT_OPTIONS, CURRENCIES } from "./config.js"
 import './App.css';
 import axios from "axios";
-import { async } from 'q';
 
 class App extends Component {
   state = {
@@ -58,45 +57,43 @@ class App extends Component {
     return (
       <div className="App">
         <Container>
-          <Form size="large">
-            <Grid divided='vertically'>
-              <Grid.Row columns={3}>
-                <Grid.Column width={7} >
-                  <Form.Select search fluid label='Convert' options={SELECT_OPTIONS} placeholder='Currency' name="fromCurrency" value={fromCurrency} onChange={this.handleChange} />
-                </Grid.Column>
-                <Grid.Column width={2}>
-                  <Button type="button" icon='exchange' className="swap-button" circular onClick={this.swapCurrencies} />
-                </Grid.Column>
-                <Grid.Column width={7} >
-                  <Form.Select search fluid label='Into' options={SELECT_OPTIONS} placeholder='Currency' name="toCurrency" value={toCurrency} onChange={this.handleChange} />
-                </Grid.Column>
-              </Grid.Row>
+          <Grid divided='vertically'>
+            <Grid.Row columns={3}>
+              <Grid.Column width={7} >
+                <Select search fluid label='Convert' options={SELECT_OPTIONS} placeholder='Currency' name="fromCurrency" value={fromCurrency} onChange={this.handleChange} />
+              </Grid.Column>
+              <Grid.Column width={2}>
+                <Button type="button" icon='exchange' className="swap-button" title="Swap currencies" circular onClick={this.swapCurrencies} />
+              </Grid.Column>
+              <Grid.Column width={7} >
+                <Select search fluid label='Into' options={SELECT_OPTIONS} placeholder='Currency' name="toCurrency" value={toCurrency} onChange={this.handleChange} />
+              </Grid.Column>
+            </Grid.Row>
 
-              <Grid.Row columns={2}>
-                <Grid.Column>
-                  <Form.Input fluid type='number' min='1' size='massive' name="amount" className="amount-input" value={amount} onChange={this.handleChange} />
-                </Grid.Column>
-                <Grid.Column>
-                  {requestState === "loading" && <Message icon>
-                    <Icon name='circle notched' loading />
-                    Loading...
+            <Grid.Row columns={2}>
+              <Grid.Column>
+                <Input fluid type='number' min='1' size='massive' name="amount" className="amount-input" value={amount} onChange={this.handleChange} />
+              </Grid.Column>
+              <Grid.Column>
+                {requestState === "loading" && <Message icon>
+                  <Icon name='circle notched' loading />
+                  Loading...
                   </Message>}
-                  {requestState === "succeed" && <Message icon positive>
-                    <Icon name='thumbs up outline' />
-                    {result}
-                  </Message>}
-                  {requestState === "failure" && <Message icon negative>
-                    <Icon name='frown outline' />
-                    {result}
-                  </Message>}
-                  {requestState === "" && <Message icon >
-                    <Icon name='write' />
-                    {result}
-                  </Message>}
-                </Grid.Column>
-              </Grid.Row>
-            </Grid>
-          </Form>
+                {requestState === "succeed" && <Message icon positive>
+                  <Icon name='thumbs up outline' />
+                  {result}
+                </Message>}
+                {requestState === "failure" && <Message icon negative>
+                  <Icon name='frown outline' />
+                  {result}
+                </Message>}
+                {requestState === "" && <Message icon >
+                  <Icon name='write' />
+                  {result}
+                </Message>}
+              </Grid.Column>
+            </Grid.Row>
+          </Grid>
         </Container>
       </div>
     );
