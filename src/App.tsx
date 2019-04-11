@@ -1,8 +1,9 @@
 import React, { Component } from 'react';
 import { Form, Container, Button, Message, Icon, Grid } from 'semantic-ui-react'
-import { API_ENDPOINT_OANDA, API_KEY_OANDA, SELECT_OPTIONS } from "./config.js"
+import { API_ENDPOINT_OANDA, API_KEY_OANDA, SELECT_OPTIONS, CURRENCIES } from "./config.js"
 import './App.css';
 import axios from "axios";
+import { async } from 'q';
 
 class App extends Component {
   state = {
@@ -10,28 +11,46 @@ class App extends Component {
     fromCurrency: "",
     toCurrency: "",
     requestState: "",
-    result: null
+    result: "Choose the currencies"
   };
 
-  handleChange = (_event: any, data: any) => {
+  handleChange = async (_event: any, data: any) => {
     const { value, name } = data;
-    this.setState({ [name]: value });
+    await this.setState({ [name]: value });
+    if (this.isValid()) this.getData();
   };
 
-  handleSubmit = () => {
+  getData = () => {
     const { amount, fromCurrency, toCurrency } = this.state;
     this.setState({ requestState: "loading" });
     axios.get(`${API_ENDPOINT_OANDA}?api_key=${API_KEY_OANDA}&base=${fromCurrency}&quote=${toCurrency}`)
       .then(({ data }) => {
-        console.log(data);
-        /* data.error ?
-          this.setState({ requestState: "failure", result: data.message }) :
-          this.setState({ requestState: "succeed", result: data.text }); */
+        this.setState({ requestState: "succeed", result: (data.quotes[0].midpoint * amount).toFixed(4) });
       })
       .catch(() => this.setState({ requestState: "failure", result: "Oops... something went wrong :(" }));
   };
 
-  swapCurrencies = () => this.setState({ fromCurrency: this.state.toCurrency, toCurrency: this.state.fromCurrency });
+  isValid = () => {
+    const { amount, fromCurrency, toCurrency } = this.state;
+    if (fromCurrency && toCurrency && fromCurrency === toCurrency) {
+      this.setState({ result: `Can't convert ${fromCurrency} into ${fromCurrency}`, requestState: "" });
+      return false;
+    };
+
+    if (amount <= 0) {
+      this.setState({ result: `Choose an amount`, requestState: "" });
+      return false;
+    };
+
+    if (CURRENCIES.includes(fromCurrency) && CURRENCIES.includes(toCurrency) && amount > 0) return true;
+    this.setState({ result: `Choose the currencies`, requestState: "" });
+    return false;
+  }
+
+  swapCurrencies = async () => {
+    await this.setState({ fromCurrency: this.state.toCurrency, toCurrency: this.state.fromCurrency });
+    if (this.isValid()) this.getData();
+  };
 
   render() {
     const { amount, fromCurrency, toCurrency, requestState, result } = this.state;
@@ -39,7 +58,7 @@ class App extends Component {
     return (
       <div className="App">
         <Container>
-          <Form onSubmit={this.handleSubmit} size="large">
+          <Form size="large">
             <Grid divided='vertically'>
               <Grid.Row columns={3}>
                 <Grid.Column width={7} >
@@ -55,7 +74,7 @@ class App extends Component {
 
               <Grid.Row columns={2}>
                 <Grid.Column>
-                  <Form.Input fluid type='number' min='1' required name="amount" value={amount} onChange={this.handleChange} />
+                  <Form.Input fluid type='number' min='1' size='massive' name="amount" className="amount-input" value={amount} onChange={this.handleChange} />
                 </Grid.Column>
                 <Grid.Column>
                   {requestState === "loading" && <Message icon>
@@ -70,17 +89,14 @@ class App extends Component {
                     <Icon name='frown outline' />
                     {result}
                   </Message>}
+                  {requestState === "" && <Message icon >
+                    <Icon name='write' />
+                    {result}
+                  </Message>}
                 </Grid.Column>
               </Grid.Row>
             </Grid>
-            <Form.Group widths='equal'>
-
-
-            </Form.Group>
-            <Form.Button>Convert</Form.Button>
           </Form>
-
-
         </Container>
       </div>
     );

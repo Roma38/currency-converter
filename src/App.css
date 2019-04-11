@@ -10,3 +10,7 @@
   align-self: flex-end;
   margin: 10px auto;
 }
+
+.ui.input>input[name~="amount"] {
+  text-align: right;
+}
