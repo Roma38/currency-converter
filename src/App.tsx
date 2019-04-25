@@ -3,9 +3,24 @@ import { Select, Input, Container, Button, Message, Icon, Grid } from 'semantic-
 import { API_ENDPOINT_OANDA, API_KEY_OANDA, SELECT_OPTIONS, CURRENCIES } from "./config.js"
 import './App.css';
 import axios from "axios";
+import { string } from 'prop-types';
 
-class App extends Component {
-  state = {
+interface Props { };
+interface State {
+  amount: number;
+  fromCurrency: string;
+  toCurrency: string;
+  requestState: string;
+  result: string;
+};
+
+interface DropdownProps {
+  key: string;
+  text: string;
+  value: string;
+};
+class App extends Component<Props, State> {
+  state: State = {
     amount: 1,
     fromCurrency: "",
     toCurrency: "",
@@ -13,8 +28,8 @@ class App extends Component {
     result: "Choose the currencies"
   };
 
-  handleChange = async (_event: any, data: any) => {
-    const { value, name } = data;
+  handleChange = async (_event: React.SyntheticEvent<HTMLElement, Event>, data: any) => {
+    const { value, name }: { value: string | number, name: "amount" | "fromCurrency" | "toCurrency" | undefined } = data;
     await this.setState({ [name]: value });
     if (this.isValid()) this.getData();
   };
